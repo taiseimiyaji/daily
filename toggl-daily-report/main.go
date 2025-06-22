@@ -40,14 +40,22 @@ func main() {
 		os.Exit(0)
 	}
 
-	targetDate := time.Now()
+	// 日本のタイムゾーンを設定
+	jst, err := time.LoadLocation("Asia/Tokyo")
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "Error: Failed to load JST timezone: %v\n", err)
+		os.Exit(1)
+	}
+
+	targetDate := time.Now().In(jst)
 	if dateStr != "" {
 		parsedDate, err := time.Parse("2006-01-02", dateStr)
 		if err != nil {
 			fmt.Fprintf(os.Stderr, "Error: Invalid date format. Use YYYY-MM-DD\n")
 			os.Exit(1)
 		}
-		targetDate = parsedDate
+		// 日本時間として解釈
+		targetDate = time.Date(parsedDate.Year(), parsedDate.Month(), parsedDate.Day(), 0, 0, 0, 0, jst)
 	}
 
 	if configPath == "" {
