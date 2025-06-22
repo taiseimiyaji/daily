@@ -48,8 +48,14 @@ func (c *TogglClient) GetTimeEntries(date time.Time, workspaceID string) ([]Time
 		}
 	}
 
-	// Use the standard Toggl API v9 for time entries
-	startTime := time.Date(date.Year(), date.Month(), date.Day(), 0, 0, 0, 0, time.UTC)
+	// 日本のタイムゾーンを取得
+	jst, err := time.LoadLocation("Asia/Tokyo")
+	if err != nil {
+		return nil, fmt.Errorf("failed to load JST timezone: %w", err)
+	}
+
+	// 日本時間での開始時刻と終了時刻を設定
+	startTime := time.Date(date.Year(), date.Month(), date.Day(), 0, 0, 0, 0, jst)
 	endTime := startTime.Add(24 * time.Hour).Add(-1 * time.Second)
 
 	url := fmt.Sprintf("%s/me/time_entries?start_date=%s&end_date=%s",
