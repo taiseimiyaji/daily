@@ -55,13 +55,17 @@ func (c *TogglClient) GetTimeEntries(date time.Time, workspaceID string) ([]Time
 	}
 
 	// 日本時間での開始時刻と終了時刻を設定
-	startTime := time.Date(date.Year(), date.Month(), date.Day(), 0, 0, 0, 0, jst)
-	endTime := startTime.Add(24 * time.Hour).Add(-1 * time.Second)
+	startTimeJST := time.Date(date.Year(), date.Month(), date.Day(), 0, 0, 0, 0, jst)
+	endTimeJST := startTimeJST.Add(24 * time.Hour).Add(-1 * time.Second)
+
+	// UTCに変換してからAPI呼び出し
+	startTimeUTC := startTimeJST.UTC()
+	endTimeUTC := endTimeJST.UTC()
 
 	url := fmt.Sprintf("%s/me/time_entries?start_date=%s&end_date=%s",
 		c.baseURL,
-		startTime.Format(time.RFC3339),
-		endTime.Format(time.RFC3339))
+		startTimeUTC.Format(time.RFC3339),
+		endTimeUTC.Format(time.RFC3339))
 
 	req, err := http.NewRequest("GET", url, nil)
 	if err != nil {
